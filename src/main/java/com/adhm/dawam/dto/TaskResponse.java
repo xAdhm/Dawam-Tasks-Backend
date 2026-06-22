@@ -21,6 +21,8 @@ public class TaskResponse {
     private boolean completed;
     private RecurrenceRule.Frequency frequency;
     private List<RecurrenceRule.DayOfWeek> daysOfWeek;
+    private boolean doneToday;
+    private boolean dueTodayFlag;
 
     public static TaskResponse from(Task task) {
         TaskResponse response = new TaskResponse();

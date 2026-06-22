@@ -43,4 +43,29 @@ public class RecurrenceRule {
     public enum DayOfWeek {
         MON, TUE, WED, THU, FRI, SAT, SUN
     }
+
+    public boolean isDueOn(java.time.LocalDate date) {
+        if (frequency == Frequency.DAILY) {
+            return true;
+        }
+
+        if (frequency == Frequency.SPECIFIC_DAYS) {
+            DayOfWeek today = mapJavaDayOfWeek(date.getDayOfWeek());
+            return daysOfWeek != null && daysOfWeek.contains(today);
+        }
+
+        return false;
+    }
+
+    private DayOfWeek mapJavaDayOfWeek(java.time.DayOfWeek javaDay) {
+        return switch (javaDay) {
+            case MONDAY -> DayOfWeek.MON;
+            case TUESDAY -> DayOfWeek.TUE;
+            case WEDNESDAY -> DayOfWeek.WED;
+            case THURSDAY -> DayOfWeek.THU;
+            case FRIDAY -> DayOfWeek.FRI;
+            case SATURDAY -> DayOfWeek.SAT;
+            case SUNDAY -> DayOfWeek.SUN;
+        };
+    }
 }
