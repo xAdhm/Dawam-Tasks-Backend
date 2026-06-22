@@ -35,7 +35,7 @@ public class Task {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private RecurrenceRule recurrenceRule;
 
     @Column(nullable = false)
