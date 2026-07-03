@@ -1,5 +1,5 @@
-# ✅ Dawam Task Manager (API)
-A Spring Boot REST API for a daily task/habit tracker — sections, one-time tasks, and recurring tasks with per-day completion tracking, secured by Supabase Auth JWTs.
+# ✅ Dawam Tasks Backend
+A Spring Boot REST API for a daily task/habit tracker — sections, one-time tasks, and recurring tasks with per-day completion tracking, secured by Supabase Auth JWTs. Powers the [dawam-web](https://github.com/xAdhm/dawam-web) frontend.
 ---
 ## 🛠️ Tech Stack
 - Java 17 + Spring Boot 4.1.0 (`spring-boot-starter-parent`)
@@ -18,8 +18,8 @@ A Spring Boot REST API for a daily task/habit tracker — sections, one-time tas
 ## 🚀 Setup
 ### 1. Clone the repo
 ```bash
-git clone <your-repo-url>
-cd dawam
+git clone https://github.com/xAdhm/Dawam-Tasks-Backend.git
+cd Dawam-Tasks-Backend
 ```
 ### 2. Configure environment variables
 `src/main/resources/application.properties` is checked into the repo and already points at a specific Supabase project (`aws-1-us-east-1.pooler.supabase.com`, database user `postgres.zvyppomoeyvpivalewwa`, and a matching JWKS URL). Only the password is externalized:

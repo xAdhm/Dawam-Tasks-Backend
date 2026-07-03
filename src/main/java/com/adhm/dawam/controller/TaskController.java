@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -174,6 +175,30 @@ public class TaskController {
 
                     return ResponseEntity.ok(updated);
                 })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Transactional
+    @PutMapping("/{taskId}/move")
+    public ResponseEntity<TaskResponse> moveTask(@AuthenticationPrincipal Jwt jwt,
+                                                 @PathVariable UUID sectionId,
+                                                 @PathVariable UUID taskId,
+                                                 @RequestBody Map<String, String> body) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID targetSectionId = UUID.fromString(body.get("targetSectionId"));
+
+        return taskRepository.findById(taskId)
+                .filter(task -> task.getSection().getId().equals(sectionId))
+                .filter(task -> task.getSection().getUserId().equals(userId))
+                .flatMap(task -> sectionRepository.findById(targetSectionId)
+                        .filter(target -> target.getUserId().equals(userId))
+                        .map(targetSection -> {
+                            int nextPosition = taskRepository.findBySectionIdOrderByPosition(targetSectionId).size();
+                            task.setSection(targetSection);
+                            task.setPosition(nextPosition);
+                            Task saved = taskRepository.save(task);
+                            return ResponseEntity.ok(toResponseWithDoneToday(saved));
+                        }))
                 .orElse(ResponseEntity.notFound().build());
     }
 
