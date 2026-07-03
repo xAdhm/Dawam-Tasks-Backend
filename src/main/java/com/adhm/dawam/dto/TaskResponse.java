@@ -5,7 +5,7 @@ import com.adhm.dawam.entity.Task;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class TaskResponse {
     private UUID sectionId;
     private String title;
     private Task.TaskType type;
-    private LocalDate dueDate;
+    private LocalDateTime dueDate;
     private boolean completed;
     private RecurrenceRule.Frequency frequency;
     private List<RecurrenceRule.DayOfWeek> daysOfWeek;
