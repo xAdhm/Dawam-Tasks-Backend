@@ -11,8 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 
 @RestController
@@ -26,26 +25,32 @@ public class CalendarController {
 
     @GetMapping
     public ResponseEntity<Map<String, List<TaskResponse>>> getCalendar(
-            @AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam String start,
-            @RequestParam String end) {
+            @RequestParam String end,
+            @RequestParam(defaultValue = "UTC") String timezone) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
+
+        ZoneId userZone;
+        try {
+            userZone = ZoneId.of(timezone);
+        } catch (Exception e) {
+            userZone = ZoneId.of("UTC");
+        }
+
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
 
-        // Get all sections belonging to this user
         List<UUID> sectionIds = sectionRepository.findByUserIdOrderByPosition(userId)
                 .stream()
                 .map(s -> s.getId())
                 .toList();
 
-        // Get all tasks across all sections
         List<Task> allTasks = sectionIds.stream()
                 .flatMap(sectionId -> taskRepository.findBySectionIdOrderByPosition(sectionId).stream())
                 .toList();
 
-        // Build the calendar map: date string -> list of tasks due that day
         Map<String, List<TaskResponse>> calendar = new LinkedHashMap<>();
 
         LocalDate cursor = startDate;
@@ -58,7 +63,12 @@ public class CalendarController {
 
                 if (task.getType() == Task.TaskType.ONE_TIME) {
                     if (task.getDueDate() != null) {
-                        isDue = task.getDueDate().toLocalDate().equals(day);}
+                        LocalDate taskLocalDate = task.getDueDate()
+                                .atZone(ZoneId.of("UTC"))
+                                .withZoneSameInstant(userZone)
+                                .toLocalDate();
+                        isDue = taskLocalDate.equals(day);
+                    }
                 } else if (task.getType() == Task.TaskType.RECURRING) {
                     if (task.getRecurrenceRule() != null) {
                         isDue = task.getRecurrenceRule().isDueOn(day);
@@ -68,11 +78,9 @@ public class CalendarController {
                 if (isDue) {
                     TaskResponse response = TaskResponse.from(task);
 
-                    // Set doneToday for one-time tasks
                     if (task.getType() == Task.TaskType.ONE_TIME) {
                         response.setDoneToday(task.isCompleted());
                     } else {
-                        // For recurring, check if completed on this specific day
                         boolean doneToday = taskCompletionRepository
                                 .findByTaskIdAndCompletedDate(task.getId(), day)
                                 .isPresent();
